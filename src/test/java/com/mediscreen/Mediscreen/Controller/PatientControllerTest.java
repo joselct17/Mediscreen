@@ -37,10 +37,10 @@ public class PatientControllerTest {
         mockMvc.perform(post("/patients/validate")
                         .param("name", "John")
                         .param("lastName", "Doe")
-                        .param("birthDate", "10/20/2020")
-                        .param("gender", "M")
+                        .param("birthDate", "2000-11-20")
+                        .param("sex", "M")
                         .param("address", "101 NY")
-                        .param("phoneNumber", "110-258")
+                        .param("phone", "110-258")
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/patients/list"))
@@ -104,7 +104,14 @@ public class PatientControllerTest {
         when(patientRepository.findById(id)).thenReturn(Optional.of(patient));
         when(patientRepository.save(patient)).thenReturn(patient);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/patients/update/{id}", id))
+        mockMvc.perform(MockMvcRequestBuilders.post("/patients/update/{id}", id)
+                .param("name", "John")
+                .param("lastName", "Doe")
+                .param("birthDate", "2000-11-20")
+                .param("sex", "M")
+                .param("address", "101 NY")
+                .param("phone", "110-258")
+                .with(csrf()))
                 .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andExpect(MockMvcResultMatchers.view().name("redirect:/patients/list"));
     }

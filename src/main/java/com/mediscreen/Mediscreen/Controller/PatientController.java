@@ -1,105 +1,82 @@
 package com.mediscreen.Mediscreen.Controller;
 
 
-import com.mediscreen.Mediscreen.Repository.IPatientRepository;
 import com.mediscreen.Mediscreen.Service.Implementation.IPatientServiceImpl;
 import com.mediscreen.Mediscreen.model.PatientEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
+@RequestMapping("/api/patients")
 public class PatientController {
 
     Logger logger = LoggerFactory.getLogger(PatientController.class);
     @Autowired
     private IPatientServiceImpl iPatientService;
 
-    @GetMapping("/patients/list")
-    public String getPatients(Model model) {
 
-        model.addAttribute("patients", iPatientService.getAllPatientEntity());
-        logger.info("REQUEST:/patients/list");
-        return "patients/list";
+    @GetMapping
+    public Iterable<PatientEntity> getPatients() {
+        logger.debug("getAllPatients starts, PatientController");
+        Iterable<PatientEntity> patientEntityList = iPatientService.getAllPatientEntity();
+        logger.info("REQUEST:/patients/list All patients list success");
+        return patientEntityList;
     }
 
-    @GetMapping("/patients/add")
-    public String addUser(PatientEntity bid, Model model) {
 
-        logger.info("GET:/patients/add");
-        model.addAttribute("patients", bid);
-        return "patients/add";
+    @PostMapping
+    public ResponseEntity<PatientEntity> validate(@RequestBody @Validated PatientEntity patientEntity) {
+        logger.debug("validate starts here, from PatientController");
+        PatientEntity patientNew = iPatientService.savePatientEntity(patientEntity);
+        logger.info("POST:/patients/validate, Validate new patient success");
+        return new ResponseEntity <>(patientNew, HttpStatus.CREATED);
     }
 
-    @PostMapping("/patients/validate")
-    public String validate(@Validated PatientEntity patientEntity, BindingResult result, Model model) {
-        if (!result.hasErrors()) {
-            iPatientService.savePatientEntity(patientEntity);
-            model.addAttribute("patients", iPatientService.getAllPatientEntity());
-            logger.info("redirect:/patients/list");
-            return "redirect:/patients/list";
+    @GetMapping("/{id}")
+    public ResponseEntity<PatientEntity> getPatientById(@PathVariable Integer id) {
+        logger.debug("getPatientById  starts here, from PatientController");
+        PatientEntity patientById = iPatientService.findPatientById(id);
+        logger.info("REQUEST:/patients/info, Patient width id:{} successfully retrieved", id);
+        return ResponseEntity.ok(patientById);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PatientEntity> updatePatientById(@PathVariable Integer id, @RequestBody @Validated PatientEntity patientEntity) {
+        logger.debug("updatePatientById starts here, from PatientController");
+        PatientEntity patientEntityUpdated = iPatientService.updatedPatientEntity(id, patientEntity);
+        logger.info("Patient with id:{} has been successfully updated, from PatientController", id);
+        return ResponseEntity.ok(patientEntityUpdated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deletePatient(@PathVariable Integer id) {
+
+        try {
+            iPatientService.deletePatientEntityById(id);
+            logger.info("Patient with id:{} has been successfully deleted from PatientController", id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Patient with id:{} not found DB from PatientController", id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        logger.info("POST:/patients/validate");
-        return "patients/add";
     }
 
-    @GetMapping("/patients/info/{id}")
-    public String getPatientInfo(@PathVariable("id") Integer id, Model model) {
-        PatientEntity patients = iPatientService.findPatientById(id);
-        model.addAttribute("patients", patients);
-        logger.info("REQUEST:/patients/info");
-        return "patients/info";
-    }
-
-    @GetMapping("/patients/update/{id}")
-    public String showUpdateForm(@PathVariable("id") Integer id, Model model) {
-        PatientEntity patients = iPatientService.findPatientById(id);
-        model.addAttribute("patients", patients);
-        logger.info("GET:/patients/update");
-        return "patients/update";
-    }
-
-    @PostMapping("/patients/update/{id}")
-    public String updatePatient(@PathVariable("id") Integer id, @Validated PatientEntity patients,
-                              BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            logger.info("POST:/patients/update");
-            return "patients/update";
-        }
-        patients.setId(id);
-        iPatientService.savePatientEntity(patients);
-        model.addAttribute("patients", iPatientService.getAllPatientEntity());
-        logger.info("redirect:/patients/list");
-        return "redirect:/patients/list";
-    }
-
-    @GetMapping("/patients/delete/{id}")
-    public String deletePatient(@PathVariable("id") Integer id, Model model) {
-        iPatientService.deletePatientEntityById(id);
-
-        model.addAttribute("patients", iPatientService.getAllPatientEntity());
-        logger.info("GET:/patients/delete");
-        return "redirect:/patients/list";
-    }
-
-    @GetMapping("/patients/list/{lastName}")
-    public String findByLastName(@PathVariable("lastName") String lastName, Model model) {
-        PatientEntity patientsByLastName = iPatientService.findPatientByLastName(lastName);
-
-        model.addAttribute("patients", iPatientService.getAllPatientEntity());
-        model.addAttribute("patientsByLastNames", patientsByLastName);
-
-        return "patients/list";
+    @GetMapping("/by-lastName/{lastName}")
+    public ResponseEntity<List<PatientEntity>> findPatientByLastName(@PathVariable  String lastName) {
+        logger.debug("findPatientByLastName starts here from PatientController");
+        List<PatientEntity> patientsByLastNameList = iPatientService.findPatientByLastName(lastName);
+        logger.info("Patient with lastName:{} has been found from PatientController", lastName);
+        return ResponseEntity.ok(patientsByLastNameList);
     }
 
 

@@ -12,8 +12,11 @@ public interface IPatientService {
 
     PatientEntity findPatientById(Integer id);
 
-    PatientEntity findPatientByLastName(String lastName);
+    List<PatientEntity> findPatientByLastName(String lastName);
 
 
     PatientEntity savePatientEntity(PatientEntity patientEntity);
+
+
+    PatientEntity updatedPatientEntity(Integer id, PatientEntity patientEntity);
 }

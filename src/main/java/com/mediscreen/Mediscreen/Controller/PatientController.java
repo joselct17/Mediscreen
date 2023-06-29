@@ -6,6 +6,9 @@ import com.mediscreen.Mediscreen.model.PatientEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -24,12 +27,15 @@ public class PatientController {
     private IPatientServiceImpl iPatientService;
 
 
+
     @GetMapping
-    public Iterable<PatientEntity> getPatients() {
-        logger.debug("getAllPatients starts, PatientController");
-        Iterable<PatientEntity> patientEntityList = iPatientService.getAllPatientEntity();
-        logger.info("REQUEST:/patients/list All patients list success");
-        return patientEntityList;
+    public Page<PatientEntity> getPatients(@RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "10") int size) {
+        logger.debug("getPatients starts, PatientController");
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PatientEntity> patientPage = iPatientService.getPaginatedPatients(pageable);
+        logger.info("getPatients Paginated patients list success");
+        return patientPage;
     }
 
 
@@ -72,9 +78,11 @@ public class PatientController {
     }
 
     @GetMapping("/by-lastName/{lastName}")
-    public ResponseEntity<List<PatientEntity>> findPatientByLastName(@PathVariable  String lastName) {
+    public ResponseEntity<Page<PatientEntity>> findPatientByLastName(@PathVariable  String lastName, @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size) {
         logger.debug("findPatientByLastName starts here from PatientController");
-        List<PatientEntity> patientsByLastNameList = iPatientService.findPatientByLastName(lastName);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PatientEntity> patientsByLastNameList = iPatientService.findPatientByLastName(lastName,pageable);
         logger.info("Patient with lastName:{} has been found from PatientController", lastName);
         return ResponseEntity.ok(patientsByLastNameList);
     }

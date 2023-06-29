@@ -7,9 +7,10 @@ import com.mediscreen.Mediscreen.model.PatientEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -56,9 +57,9 @@ public class IPatientServiceImpl implements IPatientService {
 
 
     @Override
-    public List<PatientEntity> findPatientByLastName(String lastName) {
+    public Page<PatientEntity> findPatientByLastName(String lastName, Pageable pageable) {
         logger.debug("getPatientByLastName from PatientServiceImpl starts here");
-        List<PatientEntity>patient = patientRepository.findPatientByLastName(lastName);
+        Page<PatientEntity>patient = patientRepository.findPatientByLastName(lastName, pageable);
 
         if (patient.isEmpty()) {
             logger.error("Patient doesn't exist in DB with lastName:{{}}", lastName);
@@ -96,6 +97,11 @@ public class IPatientServiceImpl implements IPatientService {
             logger.debug("Any patient  exist with id:{} in DB!", id);
             throw new RuntimeException("Any patient  exist with id:{%s}".formatted(id));
         }
+    }
+
+    @Override
+    public Page<PatientEntity> getPaginatedPatients(Pageable pageable) {
+        return patientRepository.findAll(pageable);
     }
 }
 

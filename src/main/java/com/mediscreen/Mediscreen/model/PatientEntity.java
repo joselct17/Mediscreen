@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "patient")
+@Table(name = "PATIENT")
 public class PatientEntity {
 
     @Id

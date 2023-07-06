@@ -4,22 +4,17 @@ package com.mediscreen.Mediscreen.Controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mediscreen.Mediscreen.Repository.IPatientRepository;
 import com.mediscreen.Mediscreen.Service.Implementation.IPatientServiceImpl;
-import com.mediscreen.Mediscreen.Service.interfaces.IPatientService;
 import com.mediscreen.Mediscreen.model.PatientEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -27,18 +22,15 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.not;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PatientController.class)
@@ -67,23 +59,28 @@ public class PatientControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
+
     @Test
     public void testGetPatients() throws Exception {
         // Arrange
-        List<PatientEntity> expectedPatients;
-        PatientEntity patient1 = new PatientEntity(1,"Jose", "Cardona", LocalDate.now(),"M", "101 Avenue", "525-556" );
-        PatientEntity patient2 = new PatientEntity(2,"Luis", "Trujillo", LocalDate.now(),"M", "101 Avenue", "525-556" );
+        List<PatientEntity> patientList = new ArrayList<>();
+        PatientEntity patient1 = new PatientEntity(1, "John", "Doe", LocalDate.now(), "M", "123 Main St", "555-1234");
+        PatientEntity patient2 = new PatientEntity(2, "Jane", "Doe", LocalDate.now(), "F", "456 Oak Ave", "555-5678");
+        patientList.add(patient1);
+        patientList.add(patient2);
 
-        expectedPatients = List.of(patient1, patient2);
+        // Créez une page à partir de la liste de patients
+        Pageable pageable = Pageable.ofSize(10).withPage(0);
+        Page<PatientEntity> patientPage = new PageImpl<>(patientList, pageable, patientList.size());
 
-        Mockito.when(patientService.getAllPatientEntity()).thenReturn(expectedPatients);
+        when(patientService.getPaginatedPatients( pageable)).thenReturn(patientPage);
 
         // Act and Assert
         mockMvc.perform(MockMvcRequestBuilders.get("/api/patients"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].lastName").value("Cardona"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].name").value("Luis"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].lastName").value("Doe"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[1].name").value("Jane"))
                 .andReturn();
     }
 
@@ -156,26 +153,35 @@ public class PatientControllerTest {
         verify(patientService).deletePatientEntityById(anyInt());
     }
 
-
     @Test
-    void testGetPatientByLastName() throws Exception {
-        List<PatientEntity> patientEntityList;
+    void testFindPatientByLastName() throws Exception {
+        // Créez une liste de patients avec le même nom de famille
+        List<PatientEntity> patientList = new ArrayList<>();
+        PatientEntity patient1 = new PatientEntity(1, "John", "Doe", LocalDate.now(), "M", "123 Main St", "555-1234");
+        PatientEntity patient2 = new PatientEntity(2, "Jane", "Doe", LocalDate.now(), "F", "456 Oak Ave", "555-5678");
+        patientList.add(patient1);
+        patientList.add(patient2);
 
-        PatientEntity patient = new PatientEntity(1,"Jose", "Cardona", LocalDate.now(),"M", "101 Avenue", "525-556");
-        PatientEntity patient2 = new PatientEntity(2,"Luis", "Cardona", LocalDate.now(),"M", "101 Avenue", "525-556");
+        // Créez une page à partir de la liste de patients
+        Pageable pageable = Pageable.ofSize(10).withPage(0);
+        Page<PatientEntity> patientPage = new PageImpl<>(patientList, pageable, patientList.size());
 
-        patientEntityList = List.of(patient, patient2);
+        // Définissez le comportement attendu du service patientService
+        String lastName = "Doe";
+        when(patientService.findPatientByLastName(lastName, pageable)).thenReturn(patientPage);
 
-        String lastName = patient.getLastName();
-
-        when(patientService.findPatientByLastName(lastName)).thenReturn(patientEntityList);
-
+        // Effectuez une requête GET sur le point de terminaison
         mockMvc.perform(get("/api/patients/by-lastName/{lastName}", lastName))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].lastName", is("Cardona")));
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].lastName", is("Doe")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[1].lastName", is("Doe")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].name", is("John")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[1].name", is("Jane")));
 
-
-
+        // Vérifiez que la méthode du service patientService a été appelée avec les bons paramètres
+        verify(patientService).findPatientByLastName(lastName, pageable);
     }
+
+
 
 }

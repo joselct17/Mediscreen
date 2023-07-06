@@ -12,8 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -151,25 +153,31 @@ public class PatientServiceTest {
     }
 
     @Test
-    public void testFindPatientByLastName_ExistingLastName_Success() {
-        // Arrange
+    public void testFindPatientByLastName() {
+        // Création des données de test
         String lastName = "Doe";
-        List<PatientEntity> patientList = new ArrayList<>();
-        PatientEntity patientEntity = new PatientEntity();
-        patientEntity.setLastName(lastName);
-        patientList.add(patientEntity);
+        Pageable pageable = Pageable.ofSize(10).withPage(0);
 
-        // Mocking repository behavior
-        when(patientRepository.findPatientByLastName(lastName)).thenReturn(patientList);
+        List<PatientEntity> patients = new ArrayList<>();
+        patients.add(new PatientEntity(1, "John", "Doe",  LocalDate.now(), "M", "address","1225-5845"));
+        patients.add(new PatientEntity(2, "Jane", "Doe",  LocalDate.now(), "M", "address","1225-5845" ));
+        patients.add(new PatientEntity(3, "Alice", "Smith",  LocalDate.now(), "M", "address","1225-5845"));
 
-        // Act
-        List<PatientEntity> result = patientService.findPatientByLastName(lastName);
+        Page<PatientEntity> expectedPage = new PageImpl<>(patients);
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-        assertEquals(lastName, result.get(0).getLastName());
+        // Configuration du comportement du repository mocké
+        when(patientRepository.findPatientByLastName(lastName, pageable)).thenReturn(expectedPage);
+
+        // Appel de la méthode à tester
+        Page<PatientEntity> resultPage = patientService.findPatientByLastName(lastName, pageable);
+
+        // Vérification des résultats
+        assertNotNull(resultPage);
+        assertEquals(expectedPage.getTotalElements(), resultPage.getTotalElements());
+        assertEquals(expectedPage.getContent(), resultPage.getContent());
+
+        // Vérification des appels au repository
+        verify(patientRepository, times(1)).findPatientByLastName(lastName, pageable);
     }
 
     @Test
@@ -177,12 +185,16 @@ public class PatientServiceTest {
         // Arrange
         String lastName = "Doe";
 
+        Pageable pageable = Pageable.ofSize(10).withPage(0);
+
+        Page<PatientEntity> expectedPage = null;
+
         // Mocking repository behavior
-        when(patientRepository.findPatientByLastName(lastName)).thenReturn(new ArrayList<>());
+        when(patientRepository.findPatientByLastName(lastName, pageable)).thenReturn(expectedPage);
 
         // Act and Assert
         assertThrows(RuntimeException.class, () -> {
-            patientService.findPatientByLastName(lastName);
+            patientService.findPatientByLastName(lastName, pageable );
         });
     }
 

@@ -7,14 +7,23 @@ import com.mediscreen.Mediscreen.Service.Implementation.IPatientServiceImpl;
 import com.mediscreen.Mediscreen.model.PatientEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+
+
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
+import org.springframework.restdocs.operation.preprocess.Preprocessors;
+import org.springframework.restdocs.payload.PayloadDocumentation;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -25,10 +34,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import static org.mockito.ArgumentMatchers.*;
 import static org.hamcrest.CoreMatchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,7 +66,8 @@ public class PatientControllerTest {
 
     @BeforeEach
     void init() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .build();
     }
 
 
@@ -73,7 +84,7 @@ public class PatientControllerTest {
         Pageable pageable = Pageable.ofSize(10).withPage(0);
         Page<PatientEntity> patientPage = new PageImpl<>(patientList, pageable, patientList.size());
 
-        when(patientService.getPaginatedPatients( pageable)).thenReturn(patientPage);
+        when(patientService.getPaginatedPatients(pageable)).thenReturn(patientPage);
 
         // Act and Assert
         mockMvc.perform(MockMvcRequestBuilders.get("/api/patients"))

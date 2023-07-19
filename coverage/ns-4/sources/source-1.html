@@ -1,0 +1,174 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SecurityConfiguration</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.mediscreen.Mediscreen.config</a>
+</div>
+
+<h1>Coverage Summary for Class: SecurityConfiguration (com.mediscreen.Mediscreen.config)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SecurityConfiguration</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SecurityConfiguration$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">SecurityConfiguration$$SpringCGLIB$$1</td>
+  </tr>
+  <tr>
+    <td class="name">SecurityConfiguration$$SpringCGLIB$$2</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.mediscreen.Mediscreen.config;
+&nbsp;
+&nbsp;
+&nbsp;import org.springframework.context.annotation.Bean;
+&nbsp;import org.springframework.context.annotation.Configuration;
+&nbsp;import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+&nbsp;import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+&nbsp;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+&nbsp;import org.springframework.security.web.SecurityFilterChain;
+&nbsp;
+&nbsp;@Configuration
+&nbsp;@EnableWebSecurity
+<b class="fc">&nbsp;public class SecurityConfiguration {</b>
+&nbsp;    /**
+&nbsp;     * Spring Security needs to have a PasswordEncoder defined.
+&nbsp;     * @return PasswordEncoder that uses the BCrypt
+&nbsp;     */
+&nbsp;    @Bean
+&nbsp;    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+<b class="fc">&nbsp;        return new BCryptPasswordEncoder();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Bean
+&nbsp;    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<b class="fc">&nbsp;        http.csrf().disable()</b>
+<b class="fc">&nbsp;                .authorizeHttpRequests((requests) -&gt; requests</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/**&quot;).permitAll()</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/login/**&quot;).permitAll()</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/registration/**&quot;).permitAll()</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/usertransaction/**&quot;).hasAnyRole(&quot;USER&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/banktransaction/**&quot;).hasAnyRole(&quot;USER&quot;)</b>
+<b class="fc">&nbsp;                        .requestMatchers(&quot;/connection/**&quot;).hasAnyRole(&quot;USER&quot;)</b>
+<b class="fc">&nbsp;                        .anyRequest().authenticated()</b>
+&nbsp;                )
+<b class="fc">&nbsp;                .formLogin((form) -&gt; form</b>
+<b class="fc">&nbsp;                        .loginPage(&quot;/login&quot;)</b>
+<b class="fc">&nbsp;                        .loginProcessingUrl(&quot;/login&quot;)</b>
+<b class="fc">&nbsp;                        .defaultSuccessUrl(&quot;/&quot;)</b>
+<b class="fc">&nbsp;                        .permitAll()</b>
+&nbsp;
+&nbsp;                )
+&nbsp;//               .oauth2Login((form) -&gt;form
+&nbsp;//                    .defaultSuccessUrl(&quot;/usertransaction&quot;)
+&nbsp;//                    .loginPage(&quot;/login&quot;)
+&nbsp;//
+&nbsp;//                )
+&nbsp;
+<b class="fc">&nbsp;                .logout((logout) -&gt; logout.permitAll()</b>
+<b class="fc">&nbsp;                        .logoutSuccessUrl(&quot;/&quot;)</b>
+&nbsp;                );
+&nbsp;
+<b class="fc">&nbsp;        return http.build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-07-19 13:21</div>
+</div>
+</body>
+</html>

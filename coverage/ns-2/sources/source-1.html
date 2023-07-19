@@ -1,0 +1,226 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PatientController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.mediscreen.Mediscreen.Controller</a>
+</div>
+
+<h1>Coverage Summary for Class: PatientController (com.mediscreen.Mediscreen.Controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PatientController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90%
+  </span>
+  <span class="absValue">
+    (27/30)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.mediscreen.Mediscreen.Controller;
+&nbsp;
+&nbsp;
+&nbsp;import com.mediscreen.Mediscreen.Service.Implementation.IPatientServiceImpl;
+&nbsp;import com.mediscreen.Mediscreen.model.PatientEntity;
+&nbsp;import io.swagger.v3.oas.annotations.Operation;
+&nbsp;import io.swagger.v3.oas.annotations.Parameter;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponse;
+&nbsp;import io.swagger.v3.oas.annotations.responses.ApiResponses;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * PatientController handles all HTTP requests related to patients.
+&nbsp; * It exposes the patient-related APIs to the clients.
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/api/patients&quot;)
+<b class="fc">&nbsp;public class PatientController {</b>
+&nbsp;
+<b class="fc">&nbsp;    Logger logger = LoggerFactory.getLogger(PatientController.class);</b>
+&nbsp;    @Autowired
+&nbsp;    private IPatientServiceImpl iPatientService;
+&nbsp;
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Obtenir la liste paginée des patients&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Liste paginée des patients récupérée avec succès&quot;)
+&nbsp;    })
+&nbsp;    @GetMapping
+&nbsp;    public Page&lt;PatientEntity&gt; getPatients( @Parameter(description = &quot;Numéro de page&quot;) @RequestParam(defaultValue = &quot;0&quot;) int page,
+&nbsp;                                            @Parameter(description = &quot;Taille de la page&quot;) @RequestParam(defaultValue = &quot;10&quot;) int size) {
+<b class="fc">&nbsp;        logger.debug(&quot;getPatients starts, PatientController&quot;);</b>
+<b class="fc">&nbsp;        Pageable pageable = PageRequest.of(page, size);</b>
+<b class="fc">&nbsp;        Page&lt;PatientEntity&gt; patientPage = iPatientService.getPaginatedPatients(pageable);</b>
+<b class="fc">&nbsp;        logger.info(&quot;getPatients Paginated patients list success&quot;);</b>
+<b class="fc">&nbsp;        return patientPage;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Valider un nouveau patient&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Nouveau patient validé avec succès&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Requête invalide&quot;),
+&nbsp;    })
+&nbsp;    @PostMapping
+&nbsp;    public ResponseEntity&lt;PatientEntity&gt; validate(@RequestBody @Validated PatientEntity patientEntity) {
+<b class="fc">&nbsp;        logger.debug(&quot;validate starts here, from PatientController&quot;);</b>
+<b class="fc">&nbsp;        PatientEntity patientNew = iPatientService.savePatientEntity(patientEntity);</b>
+<b class="fc">&nbsp;        logger.info(&quot;POST:/patients/validate, Validate new patient success&quot;);</b>
+<b class="fc">&nbsp;        return new ResponseEntity &lt;&gt;(patientNew, HttpStatus.CREATED);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Obtenir un patient par son ID&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Patient récupéré avec succès&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Patient non trouvé&quot;)
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;PatientEntity&gt; getPatientById( @Parameter(description = &quot;ID du patient&quot;) @PathVariable Integer id) {
+<b class="fc">&nbsp;        logger.debug(&quot;getPatientById  starts here, from PatientController&quot;);</b>
+<b class="fc">&nbsp;        PatientEntity patientById = iPatientService.findPatientById(id);</b>
+<b class="fc">&nbsp;        logger.info(&quot;REQUEST:/patients/info, Patient width id:{} successfully retrieved&quot;, id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(patientById);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Mettre à jour un patient par son ID&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Patient mis à jour avec succès&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Requête invalide&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Patient non trouvé&quot;)
+&nbsp;    })
+&nbsp;    @PutMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;PatientEntity&gt; updatePatientById( @Parameter(description = &quot;ID du patient&quot;) @PathVariable Integer id, @RequestBody @Validated PatientEntity patientEntity) {
+<b class="fc">&nbsp;        logger.debug(&quot;updatePatientById starts here, from PatientController&quot;);</b>
+<b class="fc">&nbsp;        PatientEntity patientEntityUpdated = iPatientService.updatedPatientEntity(id, patientEntity);</b>
+<b class="fc">&nbsp;        logger.info(&quot;Patient with id:{} has been successfully updated, from PatientController&quot;, id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(patientEntityUpdated);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Supprimer un patient par son ID&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Patient supprimé avec succès&quot;),
+&nbsp;            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Patient non trouvé&quot;)
+&nbsp;    })
+&nbsp;    @DeleteMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;HttpStatus&gt; deletePatient( @Parameter(description = &quot;ID du patient&quot;) @PathVariable Integer id) {
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            iPatientService.deletePatientEntityById(id);</b>
+<b class="fc">&nbsp;            logger.info(&quot;Patient with id:{} has been successfully deleted from PatientController&quot;, id);</b>
+<b class="fc">&nbsp;            return new ResponseEntity&lt;&gt;(HttpStatus.OK);</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Patient with id:{} not found DB from PatientController&quot;, id);</b>
+<b class="nc">&nbsp;            return new ResponseEntity&lt;&gt;(HttpStatus.NO_CONTENT);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Operation(summary = &quot;Trouver un patient par son nom de famille&quot;)
+&nbsp;    @ApiResponses(value = {
+&nbsp;            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Patient(s) récupéré(s) avec succès&quot;)
+&nbsp;    })
+&nbsp;    @GetMapping(&quot;/by-lastName/{lastName}&quot;)
+&nbsp;    public ResponseEntity&lt;Page&lt;PatientEntity&gt;&gt; findPatientByLastName( @Parameter(description = &quot;Nom de famille du patient&quot;) @PathVariable  String lastName, @Parameter(description = &quot;Numéro de page&quot;) @RequestParam(defaultValue = &quot;0&quot;) int page,
+&nbsp;                                                                      @Parameter(description = &quot;Taille de la page&quot;) @RequestParam(defaultValue = &quot;10&quot;) int size) {
+<b class="fc">&nbsp;        logger.debug(&quot;findPatientByLastName starts here from PatientController&quot;);</b>
+<b class="fc">&nbsp;        Pageable pageable = PageRequest.of(page, size);</b>
+<b class="fc">&nbsp;        Page&lt;PatientEntity&gt; patientsByLastNameList = iPatientService.findPatientByLastName(lastName,pageable);</b>
+<b class="fc">&nbsp;        logger.info(&quot;Patient with lastName:{} has been found from PatientController&quot;, lastName);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(patientsByLastNameList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-07-19 13:21</div>
+</div>
+</body>
+</html>

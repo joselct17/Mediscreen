@@ -1,0 +1,210 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > IPatientServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.mediscreen.Mediscreen.Service.Implementation</a>
+</div>
+
+<h1>Coverage Summary for Class: IPatientServiceImpl (com.mediscreen.Mediscreen.Service.Implementation)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IPatientServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.6%
+  </span>
+  <span class="absValue">
+    (44/47)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.mediscreen.Mediscreen.Service.Implementation;
+&nbsp;
+&nbsp;
+&nbsp;import com.mediscreen.Mediscreen.Repository.IPatientRepository;
+&nbsp;import com.mediscreen.Mediscreen.Service.interfaces.IPatientService;
+&nbsp;import com.mediscreen.Mediscreen.model.PatientEntity;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;public class IPatientServiceImpl implements IPatientService {</b>
+&nbsp;
+<b class="fc">&nbsp;    Logger logger = LoggerFactory.getLogger(IPatientServiceImpl.class);</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    IPatientRepository patientRepository;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Iterable&lt;PatientEntity&gt; getAllPatientEntity() {
+<b class="fc">&nbsp;        logger.info(&quot;Get all patients call, IPatientServiceImpl&quot;);</b>
+<b class="fc">&nbsp;        Iterable&lt;PatientEntity&gt; patientEntityList = patientRepository.findAll();</b>
+<b class="fc">&nbsp;        logger.info(&quot;return patientEntityList, IPatientServiceImpl&quot;);</b>
+<b class="fc">&nbsp;        return patientEntityList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void deletePatientEntityById(Integer id) {
+<b class="fc">&nbsp;        logger.info(&quot;Delete patient by Id{} call, IPatientServiceImpl&quot;, id);</b>
+<b class="fc">&nbsp;        Optional&lt;PatientEntity&gt; patientById = patientRepository.findById(id);</b>
+<b class="fc">&nbsp;        if (patientById.isPresent()) {</b>
+<b class="fc">&nbsp;            logger.info(&quot;Patient with id:{} has been successfully deleted&quot;, id);</b>
+<b class="fc">&nbsp;            patientRepository.deleteById(id);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            logger.debug(&quot;Patient with id:{} doesn&#39;t exist in DB!&quot;, id);</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;Patient with id:{%s} doesn&#39;t exist in DB!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PatientEntity findPatientById(Integer id) {
+<b class="fc">&nbsp;        logger.info(&quot;find Patient by Id{} call in IPatientServiceImpl&quot;, id);</b>
+<b class="fc">&nbsp;        Optional&lt;PatientEntity&gt; patientById = patientRepository.findById(id);</b>
+<b class="fc">&nbsp;        if (patientById.isPresent()) {</b>
+<b class="fc">&nbsp;            logger.info(&quot;Patient with id:{} has been found in IPatientServiceImpl&quot;, id);</b>
+<b class="fc">&nbsp;            return patientById.get();</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            logger.info(&quot;Patient with id{} is not found in IPatientServiceImpl,&quot;, id);</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;Patient with id:{} doesn&#39;t exist in DB!&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Page&lt;PatientEntity&gt; findPatientByLastName(String lastName, Pageable pageable) {
+<b class="fc">&nbsp;        logger.debug(&quot;getPatientByLastName from PatientServiceImpl starts here&quot;);</b>
+<b class="fc">&nbsp;        Page&lt;PatientEntity&gt;patient = patientRepository.findPatientByLastName(lastName, pageable);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (patient.isEmpty()) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Patient doesn&#39;t exist in DB with lastName:{{}}&quot;, lastName);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Patient with lastName:{%s} doesn&#39;t exist in DB!&quot;.formatted(lastName));</b>
+&nbsp;        }
+<b class="fc">&nbsp;        logger.info(&quot;Patient has been retrieved successfully by lastName:{{}}, from PatientServiceImpl&quot;, lastName);</b>
+<b class="fc">&nbsp;        return patient;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PatientEntity savePatientEntity(PatientEntity patientEntity) {
+<b class="fc">&nbsp;        logger.debug(&quot;savePatientEntity method starts here, from IPatientServiceImpl&quot;);</b>
+<b class="fc">&nbsp;        PatientEntity patientSaved = patientRepository.save(patientEntity);</b>
+<b class="fc">&nbsp;        logger.info(&quot;Patient with Id:{} has been successfully save&quot;, patientEntity.getId());</b>
+<b class="fc">&nbsp;        return patientSaved;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public PatientEntity updatedPatientEntity(Integer id, PatientEntity patientEntity) {
+<b class="fc">&nbsp;        logger.debug(&quot;updatedPatientEntityById method starts here, from IPatientServiceImpl&quot;);</b>
+<b class="fc">&nbsp;        Optional&lt;PatientEntity&gt; patientById = patientRepository.findById(id);</b>
+<b class="fc">&nbsp;        if (patientById.isPresent()) {</b>
+<b class="fc">&nbsp;            PatientEntity patientUpdated = patientById.get();</b>
+<b class="fc">&nbsp;            patientById.get().setId(patientEntity.getId());</b>
+<b class="fc">&nbsp;            patientById.get().setName(patientEntity.getName());</b>
+<b class="fc">&nbsp;            patientById.get().setPhone(patientEntity.getPhone());</b>
+<b class="fc">&nbsp;            patientById.get().setSex(patientEntity.getSex());</b>
+<b class="fc">&nbsp;            patientById.get().setBirthDate(patientEntity.getBirthDate());</b>
+<b class="fc">&nbsp;            patientById.get().setLastName(patientEntity.getLastName());</b>
+<b class="fc">&nbsp;            patientById.get().setAddress(patientEntity.getAddress());</b>
+<b class="fc">&nbsp;            patientRepository.save(patientById.get());</b>
+<b class="fc">&nbsp;            return patientUpdated;</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            logger.debug(&quot;Any patient  exist with id:{} in DB!&quot;, id);</b>
+<b class="fc">&nbsp;            throw new RuntimeException(&quot;Any patient  exist with id:{%s}&quot;.formatted(id));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Page&lt;PatientEntity&gt; getPaginatedPatients(Pageable pageable) {
+<b class="nc">&nbsp;        return patientRepository.findAll(pageable);</b>
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-07-19 13:21</div>
+</div>
+</body>
+</html>
